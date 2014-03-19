@@ -54,14 +54,14 @@ class MigrationSpecification extends Specification {
         }
     }
 
-    def 'should create a file for each blog post ignoring comment entries'() {
+    def 'should create a file for each blog post ignoring comment, template and settings entries'() {
         when:
         migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
 
         then:
         def numberOfFilesGenerated = 0
         Paths.get(OUTPUT_DIRECTORY).toFile().eachFileMatch(~/.*.md/) { numberOfFilesGenerated++ }
-        numberOfFilesGenerated == 2
+        numberOfFilesGenerated == 1
     }
 
     def 'should put draft entries into a drafts folder'() {

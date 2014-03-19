@@ -28,7 +28,7 @@ class Migration {
         def atom = new Namespace('http://www.w3.org/2005/Atom')
         def content = new XmlParser().parse(file)[atom.entry]
         content.each {
-            if (!entryIsAComment(it)) {
+            if (!ignoreEntry(it)) {
                 def title = it.title.text()
                 def publishedDate = it.published.text()[0..9]
                 def filename = turnEntryTitleIntoFilenameWithNoSpecialCharacters(title)
@@ -46,8 +46,20 @@ class Migration {
         }
     }
 
-    private boolean entryIsAComment(entry) {
-        entry["thr:in-reply-to"].size() > 0
+    private boolean ignoreEntry(entry) {
+        def entryType = determineType(entry)
+        return entryType == 'comment' || entryType == 'settings' || entryType == 'template'
+    }
+
+    private static String determineType(entry) {
+        String type = null
+        entry.category.'@term'.each {
+            def entryTypeAttribute = 'http://schemas.google.com/blogger/2008/kind#'
+            if (it.startsWith(entryTypeAttribute)) {
+                type = it.substring(entryTypeAttribute.length(), it.length())
+            }
+        }
+        return type
     }
 
     private boolean entryIsDraft(entry) {
@@ -66,4 +78,5 @@ class Migration {
         //yay me, regular expressions...
         ((title.toLowerCase() =~ '[^a-zA-Z0-9 ]').replaceAll('') =~ ' ').replaceAll('_')
     }
+
 }
