@@ -2,12 +2,13 @@ package com.mechanitis.atomtohugo
 
 import groovy.xml.Namespace
 
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
 import static java.nio.file.Files.createDirectory
+import static java.nio.file.Files.exists
 import static java.nio.file.Files.isDirectory
+import static java.nio.file.Files.write
 
 class Migration {
     String metadata = '{\n' +
@@ -20,20 +21,27 @@ class Migration {
                       '}'
 
     void migrateToMarkdown(String atomFile, String outputDirectory) {
-        Path outputDirectoryPath = ensureOutputDirectoryExists(outputDirectory)
+        Path outputDirectoryPath = Paths.get(outputDirectory)
+        ensureDirectoryExists(outputDirectoryPath)
 
         def file = new File(atomFile)
         def atom = new Namespace('http://www.w3.org/2005/Atom')
         def content = new XmlParser().parse(file)[atom.entry]
         content.each {
             if (!entryIsAComment(it)) {
-                //as long as it's not a comment
                 def title = it.title.text()
                 def publishedDate = it.published.text()[0..9]
                 def filename = turnEntryTitleIntoFilenameWithNoSpecialCharacters(title)
 
-                def outputFile = outputDirectoryPath.resolve("${filename}.md")
-                Files.write(outputFile, [String.format(metadata, filename, title, publishedDate), it.content.text()])
+                def outputFile
+                if (entryIsDraft(it)) {
+                    def draftsDirectory = outputDirectoryPath.resolve('drafts')
+                    ensureDirectoryExists(draftsDirectory)
+                    outputFile = draftsDirectory.resolve("${filename}.md")
+                } else {
+                    outputFile = outputDirectoryPath.resolve("${filename}.md")
+                }
+                write(outputFile, [String.format(metadata, filename, title, publishedDate), it.content.text()])
             }
         }
     }
@@ -42,14 +50,16 @@ class Migration {
         entry["thr:in-reply-to"].size() > 0
     }
 
-    private Path ensureOutputDirectoryExists(String outputDirectory) {
-        def outputDirectoryPath = Paths.get(outputDirectory)
-        if (Files.exists(outputDirectoryPath)) {
-            assert isDirectory(outputDirectoryPath)
+    private boolean entryIsDraft(entry) {
+        entry['app:control']['app:draft'].text() == 'yes'
+    }
+
+    private void ensureDirectoryExists(Path outputPath) {
+        if (exists(outputPath)) {
+            assert isDirectory(outputPath)
         } else {
-            createDirectory(outputDirectoryPath)
+            createDirectory(outputPath)
         }
-        outputDirectoryPath
     }
 
     private static String turnEntryTitleIntoFilenameWithNoSpecialCharacters(title) {

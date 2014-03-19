@@ -48,19 +48,28 @@ class MigrationSpecification extends Specification {
                                    " \"Slug\": \"${filename}\",",
                                    ' "Section": "post"',
                                    '}']
-        List<String> expectedOutput = Files.readAllLines(Paths.get("${OUTPUT_DIRECTORY}/${OUTPUT_FILENAME}"))
+        List<String> expectedOutput = Files.readAllLines(Paths.get(OUTPUT_DIRECTORY, OUTPUT_FILENAME))
         headerInfo.eachWithIndex {
             Comparable<String> line, int i -> assert expectedOutput[i] == line
         }
     }
 
-    def 'should create a file for each blog post'() {
+    def 'should create a file for each blog post ignoring comment entries'() {
         when:
         migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
 
         then:
         def generatedFiles = list(Paths.get(OUTPUT_DIRECTORY))
         generatedFiles.count() == 2
+    }
+
+    def 'should put draft entries into a drafts folder'() {
+        when:
+        migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
+
+        then:
+        def generatedFiles = list(Paths.get(OUTPUT_DIRECTORY, 'drafts'))
+        generatedFiles.count() == 1
     }
 
     def 'should name the file after the tile but with underscores instead of spaces'() {
@@ -89,7 +98,7 @@ class MigrationSpecification extends Specification {
         removeDirectoryAndContents(outputPath)
     }
 
-    private void removeDirectoryAndContents(Path outputPath) {
+    private static void removeDirectoryAndContents(Path outputPath) {
         if (exists(outputPath)) {
             list(outputPath).each { delete(it) }
             delete(outputPath)
