@@ -24,9 +24,8 @@ class Migration {
         Path outputDirectoryPath = Paths.get(outputDirectory)
         ensureDirectoryExists(outputDirectoryPath)
 
-        def file = new File(atomFile)
         def atom = new Namespace('http://www.w3.org/2005/Atom')
-        def content = new XmlParser().parse(file)[atom.entry]
+        def content = new XmlParser().parse(new File(atomFile))[atom.entry]
         content.each {
             if (!ignoreEntry(it)) {
                 def title = it.title.text()
@@ -46,9 +45,9 @@ class Migration {
         }
     }
 
-    private boolean ignoreEntry(entry) {
+    private static boolean ignoreEntry(entry) {
         def entryType = determineType(entry)
-        return entryType == 'comment' || entryType == 'settings' || entryType == 'template'
+        entryType == 'comment' || entryType == 'settings' || entryType == 'template'
     }
 
     private static String determineType(entry) {
@@ -56,17 +55,17 @@ class Migration {
         entry.category.'@term'.each {
             def entryTypeAttribute = 'http://schemas.google.com/blogger/2008/kind#'
             if (it.startsWith(entryTypeAttribute)) {
-                type = it.substring(entryTypeAttribute.length(), it.length())
+                type = it[entryTypeAttribute.length()..-1]
             }
         }
-        return type
+        type
     }
 
-    private boolean entryIsDraft(entry) {
+    private static boolean entryIsDraft(entry) {
         entry['app:control']['app:draft'].text() == 'yes'
     }
 
-    private void ensureDirectoryExists(Path outputPath) {
+    private static void ensureDirectoryExists(Path outputPath) {
         if (exists(outputPath)) {
             assert isDirectory(outputPath)
         } else {
