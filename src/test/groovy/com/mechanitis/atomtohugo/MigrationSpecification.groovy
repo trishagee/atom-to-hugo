@@ -17,7 +17,7 @@ class MigrationSpecification extends Specification {
     Migration migration
 
     def setup() {
-        list(Paths.get(OUTPUT_DIRECTORY)).each { delete(it) }
+        removeDirectoryAndContents(Paths.get(OUTPUT_DIRECTORY))
         migration = new Migration()
     }
 
@@ -59,8 +59,9 @@ class MigrationSpecification extends Specification {
         migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
 
         then:
-        def generatedFiles = list(Paths.get(OUTPUT_DIRECTORY))
-        generatedFiles.count() == 2
+        def numberOfFilesGenerated = 0
+        Paths.get(OUTPUT_DIRECTORY).toFile().eachFileMatch(~/.*.md/) { numberOfFilesGenerated++ }
+        numberOfFilesGenerated == 2
     }
 
     def 'should put draft entries into a drafts folder'() {
@@ -100,8 +101,12 @@ class MigrationSpecification extends Specification {
 
     private static void removeDirectoryAndContents(Path outputPath) {
         if (exists(outputPath)) {
-            list(outputPath).each { delete(it) }
-            delete(outputPath)
+            list(outputPath).each {
+                if (Files.isDirectory(it)) {
+                    removeDirectoryAndContents(it)
+                }
+                delete(it)
+            }
         }
     }
 }
