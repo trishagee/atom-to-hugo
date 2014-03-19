@@ -3,26 +3,31 @@ package com.mechanitis.atomtohugo
 import spock.lang.Specification
 
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+
+import static java.nio.file.Files.delete
+import static java.nio.file.Files.exists
+import static java.nio.file.Files.list
 
 class MigrationSpecification extends Specification {
     static final String TEST_DATA_PATH = 'src/test/resources/atom-test-data.xml'
-    static final String OUTPUT_FILENAME = 'qcon_london_2014.md'
     static final String OUTPUT_DIRECTORY = 'src/test/resources/output'
+    static final String OUTPUT_FILENAME = 'qcon_london_2014.md'
     Migration migration
 
     def setup() {
-        Files.list(Paths.get(OUTPUT_DIRECTORY)).each { Files.delete(it) }
+        list(Paths.get(OUTPUT_DIRECTORY)).each { delete(it) }
         migration = new Migration()
     }
 
     def 'should turn content into markdown'() {
         when:
-        migration.migrateToMarkdown(TEST_DATA_PATH)
+        migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
 
         then:
         List<String> expectedOutput = Files.readAllLines(Paths.get("src/test/resources/${OUTPUT_FILENAME}"))
-        List<String> actualOutput = Files.readAllLines(Paths.get("src/test/resources/output/${OUTPUT_FILENAME}"))
+        List<String> actualOutput = Files.readAllLines(Paths.get("${OUTPUT_DIRECTORY}/${OUTPUT_FILENAME}"))
 
         actualOutput.size() == expectedOutput.size()
         actualOutput.eachWithIndex { Comparable<String> line, int i -> assert expectedOutput[i] == line }
@@ -30,7 +35,7 @@ class MigrationSpecification extends Specification {
 
     def 'should add meta data to the start of the entry'() {
         when:
-        migration.migrateToMarkdown(TEST_DATA_PATH)
+        migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
 
         then:
         def filename = 'qcon_london_2014'
@@ -43,7 +48,7 @@ class MigrationSpecification extends Specification {
                                    " \"Slug\": \"${filename}\",",
                                    ' "Section": "post"',
                                    '}']
-        List<String> expectedOutput = Files.readAllLines(Paths.get('src/test/resources/output/qcon_london_2014.md'))
+        List<String> expectedOutput = Files.readAllLines(Paths.get("${OUTPUT_DIRECTORY}/${OUTPUT_FILENAME}"))
         headerInfo.eachWithIndex {
             Comparable<String> line, int i -> assert expectedOutput[i] == line
         }
@@ -51,21 +56,43 @@ class MigrationSpecification extends Specification {
 
     def 'should create a file for each blog post'() {
         when:
-        migration.migrateToMarkdown(TEST_DATA_PATH)
+        migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
 
         then:
-        def generatedFiles = Files.list(Paths.get(OUTPUT_DIRECTORY))
+        def generatedFiles = list(Paths.get(OUTPUT_DIRECTORY))
         generatedFiles.count() == 2
     }
 
     def 'should name the file after the tile but with underscores instead of spaces'() {
         when:
-        migration.migrateToMarkdown(TEST_DATA_PATH)
+        migration.migrateToMarkdown(TEST_DATA_PATH, OUTPUT_DIRECTORY)
 
         then:
-        def generatedFiles = Files.list(Paths.get(OUTPUT_DIRECTORY))
+        def generatedFiles = list(Paths.get(OUTPUT_DIRECTORY))
         generatedFiles.any { it.fileName.toString() == OUTPUT_FILENAME }
     }
 
+    def 'should create output directory if it does not exist'() {
+        given:
+        def outputDirectoryThatDidNotExist = 'src/test/resources/tmp'
 
+        def outputPath = Paths.get(outputDirectoryThatDidNotExist)
+        removeDirectoryAndContents(outputPath)
+
+        when:
+        migration.migrateToMarkdown(TEST_DATA_PATH, outputDirectoryThatDidNotExist)
+
+        then:
+        Files.isDirectory(Paths.get(outputDirectoryThatDidNotExist))
+
+        cleanup:
+        removeDirectoryAndContents(outputPath)
+    }
+
+    private void removeDirectoryAndContents(Path outputPath) {
+        if (exists(outputPath)) {
+            list(outputPath).each { delete(it) }
+            delete(outputPath)
+        }
+    }
 }

@@ -57,4 +57,34 @@
         </author>
         <thr:total>0</thr:total>
     </entry>
+    <entry>
+        <id>tag:blogger.com,1999:blog-90440057274722849.post-1875650536333652391</id>
+        <published>2013-08-27T03:31:00.764+01:00</published>
+        <updated>2013-08-27T03:31:00.764+01:00</updated>
+        <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/blogger/2008/kind#comment'/>
+        <title type='text'>+1. I can&amp;#39;t believe how many layout problems y...</title>
+        <content type='html'>+1. I can&amp;#39;t believe how many layout problems you just solved. I had tried a lot of different layouts -
+            down to LayoutPanel and was still having issues. TY TY TY.
+        </content>
+        <link rel='edit' type='application/atom+xml'
+              href='https://www.blogger.com/feeds/90440057274722849/3694185229428088107/comments/default/1875650536333652391'/>
+        <link rel='self' type='application/atom+xml'
+              href='https://www.blogger.com/feeds/90440057274722849/3694185229428088107/comments/default/1875650536333652391'/>
+        <link rel='alternate' type='text/html'
+              href='http://mechanitis.blogspot.com/2011/01/gwt-why-verticalpanel-is-evil.html?showComment=1377570660764#c1875650536333652391'
+              title=''/>
+        <author>
+            <name>judd gilbert</name>
+            <uri>http://www.blogger.com/profile/15900276321866975547</uri>
+            <email>noreply@blogger.com</email>
+            <gd:image rel='http://schemas.google.com/g/2005#thumbnail' width='32' height='32'
+                      src='//lh5.googleusercontent.com/-TkS3P-16gaw/AAAAAAAAAAI/AAAAAAAAABo/TrETJTbxSYc/s512-c/photo.jpg'/>
+        </author>
+        <thr:in-reply-to href='http://mechanitis.blogspot.com/2011/01/gwt-why-verticalpanel-is-evil.html'
+                         ref='tag:blogger.com,1999:blog-90440057274722849.post-3694185229428088107'
+                         source='http://www.blogger.com/feeds/90440057274722849/posts/default/3694185229428088107' type='text/html'/>
+        <gd:extendedProperty name='blogger.itemClass' value='pid-446552808'/>
+        <gd:extendedProperty name='blogger.displayTime' value='27 August 2013 03:31'/>
+    </entry>
+
 </feed>
