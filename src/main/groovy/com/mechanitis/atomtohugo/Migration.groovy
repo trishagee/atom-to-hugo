@@ -16,6 +16,8 @@ class Migration {
                       ' "disqus_title" : "%2$s",\n' +
                       ' "Title": "%2$s",\n' +
                       ' "Pubdate": "%3$s",\n' +
+                      ' "Keywords": %4$s,\n' +
+                      ' "Tags": %4$s,\n' +
                       ' "Slug": "%1$s",\n' +
                       ' "Section": "post"\n' +
                       '}'
@@ -27,7 +29,9 @@ class Migration {
         def atom = new Namespace('http://www.w3.org/2005/Atom')
         def content = new XmlParser().parse(new File(atomFile))[atom.entry]
         content.each {
-            if (!ignoreEntry(it)) {
+            def tags = []
+            def entryType = determineTypeAndPopulateTags(it, tags)
+            if (!ignoreEntry(entryType)) {
                 def title = it.title.text()
                 def publishedDate = it.published.text()[0..9]
                 def filename = turnEntryTitleIntoFilenameWithNoSpecialCharacters(title)
@@ -40,22 +44,23 @@ class Migration {
                 } else {
                     outputFile = outputDirectoryPath.resolve("${filename}.md")
                 }
-                write(outputFile, [String.format(metadata, filename, title, publishedDate), it.content.text()])
+                write(outputFile, [String.format(metadata, filename, title, publishedDate, tags), it.content.text()])
             }
         }
     }
 
-    private static boolean ignoreEntry(entry) {
-        def entryType = determineType(entry)
+    private static boolean ignoreEntry(String entryType) {
         entryType == 'comment' || entryType == 'settings' || entryType == 'template'
     }
 
-    private static String determineType(entry) {
+    private static String determineTypeAndPopulateTags(entry, tags) {
         String type = null
         entry.category.'@term'.each {
             def entryTypeAttribute = 'http://schemas.google.com/blogger/2008/kind#'
             if (it.startsWith(entryTypeAttribute)) {
                 type = it[entryTypeAttribute.length()..-1]
+            } else {
+                tags.push("\"${it}\"")
             }
         }
         type

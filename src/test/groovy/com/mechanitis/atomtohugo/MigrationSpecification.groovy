@@ -45,6 +45,8 @@ class MigrationSpecification extends Specification {
                                    " \"disqus_title\" : \"${title}\",",
                                    " \"Title\": \"${title}\",",
                                    ' "Pubdate": "2014-03-11",',
+                                   ' "Keywords": ["qcon london", "conferences"],',
+                                   ' "Tags": ["qcon london", "conferences"],',
                                    " \"Slug\": \"${filename}\",",
                                    ' "Section": "post"',
                                    '}']
