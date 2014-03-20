@@ -11,18 +11,18 @@ import static java.nio.file.Files.isDirectory
 import static java.nio.file.Files.write
 
 class Migration {
-    String metadata = '{\n' +
-                      ' "disqus_url" : "http://trishagee.github.io/post/%1$s/",\n' +
-                      ' "disqus_title" : "%2$s",\n' +
-                      ' "Title": "%2$s",\n' +
-                      ' "Pubdate": "%3$s",\n' +
-                      ' "Keywords": %4$s,\n' +
-                      ' "Tags": %4$s,\n' +
-                      ' "Slug": "%1$s",\n' +
-                      ' "Section": "post"\n' +
-                      '}'
+    final static String METADATA = '{\n' +
+                                   ' "disqus_url" : "http://trishagee.github.io/post/%1$s/",\n' +
+                                   ' "disqus_title" : "%2$s",\n' +
+                                   ' "Title": "%2$s",\n' +
+                                   ' "Pubdate": "%3$s",\n' +
+                                   ' "Keywords": %4$s,\n' +
+                                   ' "Tags": %4$s,\n' +
+                                   ' "Slug": "%1$s",\n' +
+                                   ' "Section": "post"\n' +
+                                   '}'
 
-    void migrateToMarkdown(String atomFile, String outputDirectory) {
+    static void migrateToMarkdown(String atomFile, String outputDirectory) {
         Path outputDirectoryPath = Paths.get(outputDirectory)
         ensureDirectoryExists(outputDirectoryPath)
 
@@ -44,7 +44,7 @@ class Migration {
                 } else {
                     outputFile = outputDirectoryPath.resolve("${filename}.md")
                 }
-                write(outputFile, [String.format(metadata, filename, title, publishedDate, tags), it.content.text()])
+                write(outputFile, [String.format(METADATA, filename, title, publishedDate, tags), it.content.text()])
             }
         }
     }

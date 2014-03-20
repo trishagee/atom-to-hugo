@@ -1,1 +1,12 @@
 language: groovy
+jdk:
+- oraclejdk7
+
+notifications:
+  email:
+    recipients:
+    - trisha.gee@gmail.com
+    on_success: change
+    on_failure: always
+
+script: ./gradlew check
